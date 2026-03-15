@@ -2,12 +2,16 @@ const express    = require('express');
 const bodyParser = require('body-parser');
 const mysql      = require('mysql2/promise');
 const cors       = require('cors');
+const path       = require('path');
 
 const app  = express();
-const port = 8000;          // Express รันที่ 8000 → Postman/Frontend ใช้ port นี้
+const port = 8000;
 
 app.use(bodyParser.json());
 app.use(cors());
+
+// ── เปิดให้เข้าถึงรูปได้จาก http://localhost:8000/uploads/ชื่อไฟล์
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 let conn = null;
 
@@ -17,7 +21,7 @@ const initMYSQL = async () => {
         user:     'root',
         password: 'root',
         database: 'webdb',
-        port:     9000      // MySQL Docker "9000:3306" ตาม docker-compose
+        port:     9000
     });
     console.log('Connected to MYSQL database');
 };
