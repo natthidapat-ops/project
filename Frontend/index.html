@@ -5,13 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SecondLife</title>
   <link rel="stylesheet" href="styles.css">
+  <style>
+    .card-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  </style>
 </head>
 <body>
 
   <nav>
-    <a class="logo" href="index.html">
-      <span class="logo-icon">♻</span>SecondLife
-    </a>
+    <a class="logo" href="index.html"><span class="logo-icon">♻</span>SecondLife</a>
     <div class="nav-links">
       <a href="index.html" class="active">หน้าหลัก</a>
       <a href="post.html" class="pill">+ ลงประกาศ</a>
@@ -68,7 +73,6 @@
       'แฟชั่น':'👜','กีฬา':'🚴','หนังสือ':'📚','อื่นๆ':'📦'
     };
 
-    // แสดงชื่อ user ถ้า login แล้ว
     const user = JSON.parse(localStorage.getItem('user') || 'null');
     if (user) {
       document.getElementById('nav-login').textContent = '👤 ' + user.name;
@@ -99,7 +103,12 @@
 
       list.innerHTML = data.map(item => `
         <a class="card" href="detail.html?id=${item.id}">
-          <div class="card-img">${ICONS[item.category]||'📦'}</div>
+          <div class="card-img">
+            ${item.image_url
+              ? `<img src="${API}${item.image_url}" alt="${item.title}">`
+              : ICONS[item.category] || '📦'
+            }
+          </div>
           <div class="card-body">
             <div class="card-title">${item.title}</div>
             <div class="card-price">฿${Number(item.price).toLocaleString()}</div>
