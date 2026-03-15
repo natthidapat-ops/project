@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql_db_700
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: webdb
+    ports:
+      - "9000:3306"
+    volumes:
+      - mysql_data_700:/var/lib/mysql  # แก้ให้ชื่อตรงกับด้านล่าง
+    networks:
+      - weblab700                      # เพิ่มขีดกลาง (-) ให้ถูกต้องตามรูปแบบ
+    restart: always
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: phpmyadmin_700    # เปลี่ยนจาก 821 เป็น 700 เพื่อไม่ให้ชนกับเพื่อน
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: root
+      UPLOAD_LIMIT: 64M
+    ports:
+      - "9001:80"                      # เข้าดูผ่าน http://localhost:8701
+    depends_on:
+      - db
+    networks:
+      - weblab700
+    restart: always
+
+networks:
+  weblab700:
+    driver: bridge
+
+volumes:
+  mysql_data_700:                      # ชื่อต้องตรงกับที่ใช้ใน service db ข้างบน
+    driver: local

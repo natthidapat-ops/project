@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SecondLife — ลงประกาศ</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <nav>
+    <a class="logo" href="index.html"><span class="logo-icon">♻</span>SecondLife</a>
+    <div class="nav-links">
+      <a href="index.html">หน้าหลัก</a>
+      <a href="post.html" class="pill active">+ ลงประกาศ</a>
+      <a href="my.html">ของฉัน</a>
+      <a href="login.html" id="nav-login">เข้าสู่ระบบ</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="form-wrap">
+      <h1>ลงประกาศขาย / แลก</h1>
+      <div id="alert"></div>
+
+      <div class="fg">
+        <label>ชื่อสินค้า *</label>
+        <input type="text" id="title" placeholder="เช่น iPhone 13 Pro มือสอง">
+      </div>
+      <div class="fg">
+        <label>คำอธิบาย</label>
+        <textarea id="description" placeholder="รายละเอียดสินค้า สภาพการใช้งาน..."></textarea>
+      </div>
+      <div class="grid-2">
+        <div class="fg">
+          <label>ราคา (บาท) *</label>
+          <input type="number" id="price" placeholder="0" min="0">
+        </div>
+        <div class="fg">
+          <label>ประเภทสินค้า *</label>
+          <select id="category">
+            <option value="">-- เลือก --</option>
+            <option>อิเล็กทรอนิกส์</option>
+            <option>เฟอร์นิเจอร์</option>
+            <option>แฟชั่น</option>
+            <option>กีฬา</option>
+            <option>หนังสือ</option>
+            <option>อื่นๆ</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg">
+        <label>สภาพสินค้า *</label>
+        <select id="condition">
+          <option value="">-- เลือก --</option>
+          <option>ดีมาก</option>
+          <option>ดี</option>
+          <option>พอใช้</option>
+        </select>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="postListing()" id="submit-btn">ลงประกาศ</button>
+    </div>
+  </div>
+
+  <footer>SecondLife © 2025</footer>
+
+  <script>
+    const API  = 'http://localhost:8000';
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+
+    if (user) {
+      document.getElementById('nav-login').textContent = '👤 ' + user.name;
+      document.getElementById('nav-login').href = 'my.html';
+    }
+
+    // SPI 3 — POST /listings
+    async function postListing() {
+      const btn = document.getElementById('submit-btn');
+      btn.disabled    = true;
+      btn.textContent = 'กำลังบันทึก...';
+
+      const res  = await fetch(`${API}/listings`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id:     user?.id || 1,
+          title:       document.getElementById('title').value,
+          description: document.getElementById('description').value,
+          price:       document.getElementById('price').value,
+          category:    document.getElementById('category').value,
+          condition:   document.getElementById('condition').value
+        })
+      });
+      const data    = await res.json();
+      const alertEl = document.getElementById('alert');
+
+      if (res.ok) {
+        alertEl.className   = 'alert alert-ok';
+        alertEl.textContent = data.message;
+        setTimeout(() => location.href = 'index.html', 1500);
+      } else {
+        alertEl.className   = 'alert alert-err';
+        alertEl.textContent = data.message || 'เกิดข้อผิดพลาด';
+        btn.disabled    = false;
+        btn.textContent = 'ลงประกาศ';
+      }
+    }
+  </script>
+</body>
+</html>

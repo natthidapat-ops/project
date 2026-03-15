@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SecondLife</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <nav>
+    <a class="logo" href="index.html">
+      <span class="logo-icon">♻</span>SecondLife
+    </a>
+    <div class="nav-links">
+      <a href="index.html" class="active">หน้าหลัก</a>
+      <a href="post.html" class="pill">+ ลงประกาศ</a>
+      <a href="my.html">ของฉัน</a>
+      <a href="login.html" id="nav-login">เข้าสู่ระบบ</a>
+    </div>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-inner">
+      <div class="hero-tag">Secondhand Marketplace</div>
+      <h1>ของดี ราคาถูก<br><span>หาที่นี่</span></h1>
+      <p>แลกเปลี่ยน ซื้อขาย สินค้ามือสองคุณภาพดี จากคนจริงๆ ใกล้บ้านคุณ</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="filter-bar">
+      <input type="text" id="search" placeholder="ค้นหาสินค้า...">
+      <select id="category">
+        <option value="">ทุกประเภท</option>
+        <option>อิเล็กทรอนิกส์</option>
+        <option>เฟอร์นิเจอร์</option>
+        <option>แฟชั่น</option>
+        <option>กีฬา</option>
+        <option>หนังสือ</option>
+        <option>อื่นๆ</option>
+      </select>
+      <select id="condition">
+        <option value="">ทุกสภาพ</option>
+        <option>ดีมาก</option>
+        <option>ดี</option>
+        <option>พอใช้</option>
+      </select>
+      <button class="btn btn-primary" onclick="loadListings()">ค้นหา</button>
+    </div>
+
+    <div class="section-header">
+      <span class="section-title">สินค้าทั้งหมด</span>
+      <span class="section-count" id="count"></span>
+    </div>
+
+    <div class="grid" id="list">
+      <p style="color:var(--muted)">กำลังโหลด...</p>
+    </div>
+  </div>
+
+  <footer>SecondLife © 2025 — แลกเปลี่ยนสินค้ามือสอง ลดขยะ เพิ่มคุณค่า</footer>
+
+  <script>
+    const API = 'http://localhost:8000';
+    const ICONS = {
+      'อิเล็กทรอนิกส์':'📱','เฟอร์นิเจอร์':'🛋️',
+      'แฟชั่น':'👜','กีฬา':'🚴','หนังสือ':'📚','อื่นๆ':'📦'
+    };
+
+    // แสดงชื่อ user ถ้า login แล้ว
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    if (user) {
+      document.getElementById('nav-login').textContent = '👤 ' + user.name;
+      document.getElementById('nav-login').href = 'my.html';
+    }
+
+    // SPI 1 — GET /listings
+    async function loadListings() {
+      const search    = document.getElementById('search').value;
+      const category  = document.getElementById('category').value;
+      const condition = document.getElementById('condition').value;
+
+      const p = new URLSearchParams();
+      if (search)    p.set('search', search);
+      if (category)  p.set('category', category);
+      if (condition) p.set('condition', condition);
+
+      const res  = await fetch(`${API}/listings?${p}`);
+      const data = await res.json();
+      const list = document.getElementById('list');
+
+      document.getElementById('count').textContent = data.length + ' รายการ';
+
+      if (!data.length) {
+        list.innerHTML = '<div class="empty"><div class="empty-icon">🔍</div><p>ไม่พบสินค้า</p></div>';
+        return;
+      }
+
+      list.innerHTML = data.map(item => `
+        <a class="card" href="detail.html?id=${item.id}">
+          <div class="card-img">${ICONS[item.category]||'📦'}</div>
+          <div class="card-body">
+            <div class="card-title">${item.title}</div>
+            <div class="card-price">฿${Number(item.price).toLocaleString()}</div>
+            <div class="card-meta">
+              <span class="badge">${item.category}</span>
+              <span class="badge badge-green">${item.condition}</span>
+            </div>
+            <div class="card-seller">โดย ${item.seller_name}</div>
+          </div>
+        </a>
+      `).join('');
+    }
+
+    loadListings();
+    document.getElementById('search').addEventListener('keydown', e => {
+      if (e.key === 'Enter') loadListings();
+    });
+  </script>
+</body>
+</html>
