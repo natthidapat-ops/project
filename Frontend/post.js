@@ -34,7 +34,7 @@ const API  = 'http://localhost:8000';
       formData.append('price',       document.getElementById('price').value);
       formData.append('category',    document.getElementById('category').value);
       formData.append('condition',   document.getElementById('condition').value);
-      formData.append('status', 'available');
+      formData.append('status', 'active');
 
       // เพิ่มรูปถ้ามีการเลือก
       const imageFile = document.getElementById('image').files[0];
@@ -62,3 +62,10 @@ const API  = 'http://localhost:8000';
         btn.textContent = 'ลงประกาศ';
       }
     }
+    // Logout
+    const logoutBtn = document.getElementById('nav-logout');
+    if (user) logoutBtn.style.display = 'inline-block';
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('user');
+      location.href = 'login.html';
+    });

@@ -36,7 +36,7 @@ const API = 'http://localhost:8000';
         <a class="card" href="detail.html?id=${item.id}">
           <div class="card-img">
             ${item.image_url
-              ? `<img src="${API}${item.image_url}" alt="${item.title}">`
+              ? `<img src="${API}/uploads/${item.image_url}" alt="${item.title}">`
               : ICONS[item.category] || '📦'
             }
           </div>
@@ -56,4 +56,11 @@ const API = 'http://localhost:8000';
     loadListings();
     document.getElementById('search').addEventListener('keydown', e => {
       if (e.key === 'Enter') loadListings();
+    });
+    // Logout
+    const logoutBtn = document.getElementById('nav-logout');
+    if (user) logoutBtn.style.display = 'inline-block';
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('user');
+      location.href = 'login.html';
     });

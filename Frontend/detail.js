@@ -6,19 +6,31 @@ const API   = 'http://localhost:8000';
     if (user) {
       document.getElementById('nav-login').textContent = '👤 ' + user.name;
       document.getElementById('nav-login').href = 'my.html';
+      document.getElementById('nav-logout').style.display = 'inline-block';
     }
+    document.getElementById('nav-logout').addEventListener('click', () => {
+      localStorage.removeItem('user');
+      location.href = 'login.html';
+    });
 
     // SPI 2 — GET /listings/:id
     async function loadDetail() {
       const res  = await fetch(`${API}/listings/${id}`);
       const item = await res.json();
 
-      // แสดงรูปถ้ามี ถ้าไม่มีแสดง emoji
       const imgEl = document.getElementById('img');
       if (item.image_url) {
-        imgEl.innerHTML = `<img src="${API}${item.image_url}" alt="${item.title}">`;
+        imgEl.innerHTML = `<img src="${API}/uploads/${item.image_url}" alt="${item.title}">`;
       } else {
         imgEl.textContent = ICONS[item.category] || '📦';
+      }
+
+      // แสดง badge "ขายแล้ว" ถ้า status = sold
+      if (item.status === 'sold' || item.status === 'closed') {
+        const badge = document.createElement('div');
+        badge.style.cssText = 'display:inline-block;background:#fdecea;color:#c62828;border-radius:20px;padding:3px 12px;font-size:12px;font-weight:500;margin-bottom:8px';
+        badge.textContent = item.status === 'sold' ? '✅ ขายแล้ว' : '🔒 ปิดประกาศ';
+        document.getElementById('title').before(badge);
       }
 
       document.getElementById('title').textContent        = item.title;
@@ -67,4 +79,57 @@ const API   = 'http://localhost:8000';
       }
     }
 
+    // GET /comments/:listingId — โหลดคอมเม้นท์
+    async function loadComments() {
+      const res  = await fetch(`${API}/comments/${id}`);
+      const data = await res.json();
+      const box  = document.getElementById('comment-list');
+
+      if (!data.length) {
+        box.innerHTML = '<p style="font-size:13px;color:var(--muted);text-align:center;padding:10px 0">ยังไม่มีคอมเม้นท์</p>';
+        return;
+      }
+      box.innerHTML = data.map(c => `
+        <div class="msg-bubble">
+          <div class="msg-sender">💬 ${c.author_name}</div>
+          <div>${c.content}</div>
+        </div>
+      `).join('');
+    }
+
+    // POST /comments — โพสต์คอมเม้นท์
+    async function postComment() {
+      if (!user) {
+        const alertEl = document.getElementById('comment-alert');
+        alertEl.className   = 'alert alert-err';
+        alertEl.textContent = 'กรุณาเข้าสู่ระบบก่อนคอมเม้นท์';
+        return;
+      }
+      const content = document.getElementById('comment-text').value.trim();
+      if (!content) return;
+
+      const res  = await fetch(`${API}/comments`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ listing_id: id, user_id: user.id, content })
+      });
+      const data    = await res.json();
+      const alertEl = document.getElementById('comment-alert');
+
+      if (res.ok) {
+        document.getElementById('comment-text').value = '';
+        document.getElementById('comment-list').innerHTML += `
+          <div class="msg-bubble">
+            <div class="msg-sender">💬 ${user.name}</div>
+            <div>${content}</div>
+          </div>
+        `;
+        alertEl.className = ''; alertEl.textContent = '';
+      } else {
+        alertEl.className   = 'alert alert-err';
+        alertEl.textContent = data.message;
+      }
+    }
+
     loadDetail();
+    loadComments();

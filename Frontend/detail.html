@@ -23,6 +23,7 @@
       <a href="post.html" class="pill">+ ลงประกาศ</a>
       <a href="my.html">ของฉัน</a>
       <a href="login.html" id="nav-login">เข้าสู่ระบบ</a>
+      <a href="#" id="nav-logout" style="display:none">ออกจากระบบ</a>
     </div>
   </nav>
 
@@ -41,28 +42,18 @@
         </div>
       </div>
 
-      <!-- ขวา -->
-      <div>
-        <div class="detail-box">
-          <div style="font-size:12px;color:var(--muted);margin-bottom:8px">ผู้ขาย</div>
-          <div style="display:flex;align-items:center;gap:10px">
-            <div style="width:38px;height:38px;border-radius:50%;background:var(--acc-lt);display:flex;align-items:center;justify-content:center;font-size:16px">👤</div>
-            <div>
-              <div style="font-weight:500" id="seller"></div>
-              <div style="font-size:12px;color:var(--muted)" id="seller-email"></div>
-            </div>
-          </div>
+    <!-- ส่วนคอมเม้นท์ -->
+    <div style="margin-top:28px">
+      <div style="font-size:16px;font-weight:600;margin-bottom:16px">💬   ติดต่อสอบถามผู้ขาย</div>
+      <div class="msg-list" id="comment-list" style="max-height:none;gap:10px;margin-bottom:16px">
+        <p style="font-size:13px;color:var(--muted)">กำลังโหลด...</p>
+      </div>
+      <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:18px">
+        <div id="comment-alert"></div>
+        <div class="fg" style="margin-bottom:10px">
+          <textarea id="comment-text" placeholder="เขียนคอมเม้นท์..." rows="3"></textarea>
         </div>
-
-        <div class="detail-box">
-          <div style="font-weight:500;margin-bottom:10px">ติดต่อผู้ขาย</div>
-          <div id="alert"></div>
-          <div class="msg-list" id="msg-list"></div>
-          <div class="fg" style="margin-top:10px;margin-bottom:10px">
-            <textarea id="msg-text" placeholder="พิมพ์ข้อความถึงผู้ขาย..." rows="3"></textarea>
-          </div>
-          <button class="btn btn-primary btn-full" onclick="sendMsg()">ส่งข้อความ</button>
-        </div>
+        <button class="btn btn-secondary" onclick="postComment()">ส่งคำถาม</button>
       </div>
     </div>
   </div>
