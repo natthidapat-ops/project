@@ -13,7 +13,7 @@ const API   = 'http://localhost:8000';
       location.href = 'login.html';
     });
 
-    // SPI 2 — GET /listings/:id
+    // GET /listings/:id
     async function loadDetail() {
       const res  = await fetch(`${API}/listings/${id}`);
       const item = await res.json();
@@ -25,7 +25,6 @@ const API   = 'http://localhost:8000';
         imgEl.textContent = ICONS[item.category] || '📦';
       }
 
-      // แสดง badge "ขายแล้ว" ถ้า status = sold
       if (item.status === 'sold' || item.status === 'closed') {
         const badge = document.createElement('div');
         badge.style.cssText = 'display:inline-block;background:#fdecea;color:#c62828;border-radius:20px;padding:3px 12px;font-size:12px;font-weight:500;margin-bottom:8px';
@@ -45,41 +44,36 @@ const API   = 'http://localhost:8000';
       document.title = 'SecondLife — ' + item.title;
     }
 
-    // SPI 5 — POST /messages
+    // POST /messages — ข้อความส่วนตัว
     async function sendMsg() {
+      const alertEl = document.getElementById('msg-alert');
+      if (!user) {
+        alertEl.className   = 'alert alert-err';
+        alertEl.textContent = 'กรุณาเข้าสู่ระบบก่อนส่งข้อความ';
+        return;
+      }
       const content = document.getElementById('msg-text').value.trim();
       if (!content) return;
 
       const res  = await fetch(`${API}/messages`, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          listing_id: id,
-          sender_id:  user?.id || 1,
-          content:    content
-        })
+        body: JSON.stringify({ listing_id: id, sender_id: user.id, content })
       });
-      const data    = await res.json();
-      const alertEl = document.getElementById('alert');
+      const data = await res.json();
 
       if (res.ok) {
         alertEl.className   = 'alert alert-ok';
-        alertEl.textContent = data.message;
+        alertEl.textContent = 'ส่งข้อความแล้ว ✅';
         document.getElementById('msg-text').value = '';
-        document.getElementById('msg-list').innerHTML += `
-          <div class="msg-bubble">
-            <div class="msg-sender">${user?.name || 'คุณ'}</div>
-            <div>${content}</div>
-          </div>
-        `;
-        setTimeout(() => { alertEl.textContent=''; alertEl.className=''; }, 3000);
+        setTimeout(() => { alertEl.textContent = ''; alertEl.className = ''; }, 3000);
       } else {
         alertEl.className   = 'alert alert-err';
         alertEl.textContent = data.message;
       }
     }
 
-    // GET /comments/:listingId — โหลดคอมเม้นท์
+    // GET /comments/:listingId — คอมเม้นท์สาธารณะ
     async function loadComments() {
       const res  = await fetch(`${API}/comments/${id}`);
       const data = await res.json();
@@ -97,10 +91,10 @@ const API   = 'http://localhost:8000';
       `).join('');
     }
 
-    // POST /comments — โพสต์คอมเม้นท์
+    // POST /comments
     async function postComment() {
+      const alertEl = document.getElementById('comment-alert');
       if (!user) {
-        const alertEl = document.getElementById('comment-alert');
         alertEl.className   = 'alert alert-err';
         alertEl.textContent = 'กรุณาเข้าสู่ระบบก่อนคอมเม้นท์';
         return;
@@ -113,8 +107,7 @@ const API   = 'http://localhost:8000';
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ listing_id: id, user_id: user.id, content })
       });
-      const data    = await res.json();
-      const alertEl = document.getElementById('comment-alert');
+      const data = await res.json();
 
       if (res.ok) {
         document.getElementById('comment-text').value = '';

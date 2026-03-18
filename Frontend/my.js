@@ -54,7 +54,7 @@ const API   = 'http://localhost:8000';
       }
 
       if (sold.length) {
-        html += `<div class="sect-label" style="margin-top:24px;color:var(--green)">ขายแล้ว 🎉 (${sold.length})</div>`;
+        html += `<div class="sect-label" style="margin-top:24px;color:var(--green)">ขายแล้ว (${sold.length})</div>`;
         html += sold.map(item => `
           <div class="my-row" style="opacity:.6">
             <div class="my-icon">${ICONS[item.category]||'📦'}</div>
@@ -78,14 +78,34 @@ const API   = 'http://localhost:8000';
       list.innerHTML = html;
     }
 
-    // ขายแล้ว — PATCH /listings/:id/sold
+    async function loadInbox() {
+      const res  = await fetch(`${API}/messages/inbox/${userId}`);
+      const data = await res.json();
+      const box  = document.getElementById('inbox');
+
+      if (!data.length) {
+        box.innerHTML = '<div class="empty"><div class="empty-icon">✉️</div><p>ยังไม่มีข้อความ</p></div>';
+        return;
+      }
+
+      box.innerHTML = data.map(msg => `
+        <div class="my-row" style="flex-direction:column;align-items:flex-start;gap:6px">
+          <div style="display:flex;justify-content:space-between;width:100%">
+            <span style="font-weight:500;font-size:13px">จาก ${msg.sender_name}</span>
+            <span style="font-size:12px;color:var(--muted)">ประกาศ: ${msg.listing_title}</span>
+          </div>
+          <div style="font-size:14px;color:var(--text)">${msg.content}</div>
+          <button class="btn btn-secondary" style="padding:4px 12px;font-size:12px" onclick="location.href='detail.html?id=${msg.listing_id}'">ไปที่ประกาศ</button>
+        </div>
+      `).join('');
+    }
+
     async function markSold(id) {
       if (!confirm('ยืนยันว่าขายสินค้านี้แล้ว?')) return;
       await fetch(`${API}/listings/${id}/sold`, { method: 'PATCH' });
       loadMyListings();
     }
 
-    // SPI 4 — DELETE /listings/:id
     async function closeListing(id) {
       if (!confirm('ต้องการปิดประกาศนี้?')) return;
       await fetch(`${API}/listings/${id}`, { method: 'DELETE' });
@@ -93,3 +113,4 @@ const API   = 'http://localhost:8000';
     }
 
     loadMyListings();
+    loadInbox();
