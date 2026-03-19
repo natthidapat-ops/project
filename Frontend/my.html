@@ -5,6 +5,54 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SecondLife — ของฉัน</title>
   <link rel="stylesheet" href="styles.css">
+  <style>
+    .reply-box {
+      margin-top: 8px;
+      background: var(--acc-lt);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 13px;
+      color: var(--accent);
+      border-left: 3px solid var(--accent);
+    }
+    .reply-form {
+      margin-top: 10px;
+      display: flex;
+      gap: 8px;
+    }
+    .reply-form textarea {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: 'Sarabun', sans-serif;
+      resize: none;
+      outline: none;
+    }
+    .reply-form textarea:focus { border-color: var(--accent); }
+    .tabs {
+      display: flex;
+      gap: 0;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      max-width: 320px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 9px 16px;
+      font-size: 14px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      color: var(--muted);
+      font-family: 'Sarabun', sans-serif;
+      transition: all .18s;
+    }
+    .tab-btn.active { background: var(--accent); color: #fff; }
+  </style>
 </head>
 <body>
 
@@ -20,6 +68,7 @@
   </nav>
 
   <div class="container">
+
     <!-- ประกาศของฉัน -->
     <div class="section-header">
       <h1 style="font-size:22px">ประกาศของฉัน</h1>
@@ -27,17 +76,30 @@
     </div>
     <div id="list"><p style="color:var(--muted)">กำลังโหลด...</p></div>
 
-    <!-- inbox ข้อความ -->
+    <!-- inbox + sent tabs -->
     <div style="margin-top:40px">
       <div class="section-header">
-        <h1 style="font-size:22px">✉️ ข้อความที่ได้รับ</h1>
+        <h1 style="font-size:22px">✉️ ข้อความ</h1>
       </div>
-      <div id="inbox"><p style="color:var(--muted)">กำลังโหลด...</p></div>
+
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('inbox')">📥 รับ</button>
+        <button class="tab-btn" onclick="switchTab('sent')">📤 ส่ง</button>
+      </div>
+
+      <div id="inbox-panel">
+        <div id="inbox"><p style="color:var(--muted)">กำลังโหลด...</p></div>
+      </div>
+      <div id="sent-panel" style="display:none">
+        <div id="sent"><p style="color:var(--muted)">กำลังโหลด...</p></div>
+      </div>
     </div>
+
   </div>
 
   <footer>SecondLife © 2025</footer>
 
+  <script src="toast.js"></script>
   <script src="my.js"></script>
 </body>
 </html>

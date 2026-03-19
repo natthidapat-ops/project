@@ -13,7 +13,6 @@ const API   = 'http://localhost:8000';
       location.href = 'login.html';
     });
 
-    // GET /listings/:id
     async function loadDetail() {
       const res  = await fetch(`${API}/listings/${id}`);
       const item = await res.json();
@@ -44,16 +43,10 @@ const API   = 'http://localhost:8000';
       document.title = 'SecondLife — ' + item.title;
     }
 
-    // POST /messages — ข้อความส่วนตัว
     async function sendMsg() {
-      const alertEl = document.getElementById('msg-alert');
-      if (!user) {
-        alertEl.className   = 'alert alert-err';
-        alertEl.textContent = 'กรุณาเข้าสู่ระบบก่อนส่งข้อความ';
-        return;
-      }
+      if (!user) { toast('กรุณาเข้าสู่ระบบก่อนส่งข้อความ', 'err'); return; }
       const content = document.getElementById('msg-text').value.trim();
-      if (!content) return;
+      if (!content) { toast('กรุณากรอกข้อความ', 'info'); return; }
 
       const res  = await fetch(`${API}/messages`, {
         method:  'POST',
@@ -63,17 +56,13 @@ const API   = 'http://localhost:8000';
       const data = await res.json();
 
       if (res.ok) {
-        alertEl.className   = 'alert alert-ok';
-        alertEl.textContent = 'ส่งข้อความแล้ว ✅';
+        toast('ส่งข้อความสำเร็จ ✅', 'ok');
         document.getElementById('msg-text').value = '';
-        setTimeout(() => { alertEl.textContent = ''; alertEl.className = ''; }, 3000);
       } else {
-        alertEl.className   = 'alert alert-err';
-        alertEl.textContent = data.message;
+        toast(data.message, 'err');
       }
     }
 
-    // GET /comments/:listingId — คอมเม้นท์สาธารณะ
     async function loadComments() {
       const res  = await fetch(`${API}/comments/${id}`);
       const data = await res.json();
@@ -91,16 +80,10 @@ const API   = 'http://localhost:8000';
       `).join('');
     }
 
-    // POST /comments
     async function postComment() {
-      const alertEl = document.getElementById('comment-alert');
-      if (!user) {
-        alertEl.className   = 'alert alert-err';
-        alertEl.textContent = 'กรุณาเข้าสู่ระบบก่อนคอมเม้นท์';
-        return;
-      }
+      if (!user) { toast('กรุณาเข้าสู่ระบบก่อนคอมเม้นท์', 'err'); return; }
       const content = document.getElementById('comment-text').value.trim();
-      if (!content) return;
+      if (!content) { toast('กรุณากรอกคอมเม้นท์', 'info'); return; }
 
       const res  = await fetch(`${API}/comments`, {
         method:  'POST',
@@ -110,6 +93,7 @@ const API   = 'http://localhost:8000';
       const data = await res.json();
 
       if (res.ok) {
+        toast('โพสต์คอมเม้นท์สำเร็จ', 'ok');
         document.getElementById('comment-text').value = '';
         document.getElementById('comment-list').innerHTML += `
           <div class="msg-bubble">
@@ -117,10 +101,8 @@ const API   = 'http://localhost:8000';
             <div>${content}</div>
           </div>
         `;
-        alertEl.className = ''; alertEl.textContent = '';
       } else {
-        alertEl.className   = 'alert alert-err';
-        alertEl.textContent = data.message;
+        toast(data.message, 'err');
       }
     }
 

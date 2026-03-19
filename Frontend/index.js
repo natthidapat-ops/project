@@ -10,7 +10,14 @@ const API = 'http://localhost:8000';
       document.getElementById('nav-login').href = 'my.html';
     }
 
-    // SPI 1 — GET /listings
+    const logoutBtn = document.getElementById('nav-logout');
+    if (user) logoutBtn.style.display = 'inline-block';
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('user');
+      toast('ออกจากระบบแล้ว', 'info');
+      setTimeout(() => location.href = 'login.html', 1000);
+    });
+
     async function loadListings() {
       const search    = document.getElementById('search').value;
       const category  = document.getElementById('category').value;
@@ -56,11 +63,4 @@ const API = 'http://localhost:8000';
     loadListings();
     document.getElementById('search').addEventListener('keydown', e => {
       if (e.key === 'Enter') loadListings();
-    });
-    // Logout
-    const logoutBtn = document.getElementById('nav-logout');
-    if (user) logoutBtn.style.display = 'inline-block';
-    logoutBtn.addEventListener('click', () => {
-      localStorage.removeItem('user');
-      location.href = 'login.html';
     });
