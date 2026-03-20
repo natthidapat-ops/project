@@ -11,9 +11,11 @@ const API   = 'http://localhost:8000';
       document.getElementById('nav-logout').style.display = 'inline-block';
     }
     document.getElementById('nav-logout').addEventListener('click', () => {
-      localStorage.removeItem('user');
-      toast('ออกจากระบบแล้ว', 'info');
-      setTimeout(() => location.href = 'login.html', 1000);
+      confirmDialog('ต้องการออกจากระบบ?', () => {
+        localStorage.removeItem('user');
+        toast('ออกจากระบบแล้ว', 'info');
+        setTimeout(() => location.href = 'login.html', 1000);
+      });
     });
 
     function switchTab(tab) {
@@ -77,7 +79,6 @@ const API   = 'http://localhost:8000';
       list.innerHTML = html;
     }
 
-    // inbox — ข้อความที่ได้รับ พร้อมตอบกลับได้
     async function loadInbox() {
       const res  = await fetch(`${API}/messages/inbox/${userId}`);
       const data = await res.json();
@@ -89,16 +90,16 @@ const API   = 'http://localhost:8000';
       }
 
       box.innerHTML = data.map(msg => `
-        <div class="my-row" style="flex-direction:column;align-items:flex-start;gap:6px" id="msg-${msg.id}">
+        <div class="my-row" style="flex-direction:column;align-items:flex-start;gap:6px">
           <div style="display:flex;justify-content:space-between;width:100%;align-items:center">
             <span style="font-weight:500;font-size:13px">💬 จาก <b>${msg.sender_name}</b></span>
             <span style="font-size:12px;color:var(--muted)">ประกาศ: ${msg.listing_title}</span>
           </div>
           <div style="font-size:14px;background:var(--warm);padding:8px 12px;border-radius:8px;width:100%">${msg.content}</div>
           ${msg.reply
-            ? `<div class="reply-box">↩ ตอบแล้ว: ${msg.reply}</div>`
-            : `<div class="reply-form">
-                <textarea id="reply-text-${msg.id}" placeholder="พิมพ์ตอบกลับ..." rows="2"></textarea>
+            ? `<div style="margin-top:4px;background:var(--acc-lt);border-radius:8px;padding:8px 12px;font-size:13px;color:var(--accent);border-left:3px solid var(--accent);width:100%">↩ ตอบแล้ว: ${msg.reply}</div>`
+            : `<div style="display:flex;gap:8px;width:100%;margin-top:4px">
+                <textarea id="reply-text-${msg.id}" placeholder="พิมพ์ตอบกลับ..." rows="2" style="flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'Sarabun',sans-serif;resize:none;outline:none;"></textarea>
                 <button class="btn btn-primary" style="padding:6px 14px;font-size:13px;white-space:nowrap" onclick="sendReply(${msg.id})">ตอบกลับ</button>
                </div>`
           }
@@ -107,7 +108,6 @@ const API   = 'http://localhost:8000';
       `).join('');
     }
 
-    // sent — ข้อความที่ฉันส่งออกไป พร้อม reply ที่ได้รับ
     async function loadSent() {
       const res  = await fetch(`${API}/messages/sent/${userId}`);
       const data = await res.json();
@@ -126,7 +126,7 @@ const API   = 'http://localhost:8000';
           </div>
           <div style="font-size:14px;background:var(--warm);padding:8px 12px;border-radius:8px;width:100%">${msg.content}</div>
           ${msg.reply
-            ? `<div class="reply-box">↩ ตอบกลับ: ${msg.reply}</div>`
+            ? `<div style="margin-top:4px;background:var(--acc-lt);border-radius:8px;padding:8px 12px;font-size:13px;color:var(--accent);border-left:3px solid var(--accent);width:100%">↩ ตอบกลับ: ${msg.reply}</div>`
             : `<div style="font-size:12px;color:var(--muted);font-style:italic">ยังไม่ได้รับการตอบกลับ</div>`
           }
           <button class="btn btn-secondary" style="padding:4px 12px;font-size:12px" onclick="location.href='detail.html?id=${msg.listing_id}'">ไปที่ประกาศ</button>
@@ -145,27 +145,24 @@ const API   = 'http://localhost:8000';
         body: JSON.stringify({ reply })
       });
       const data = await res.json();
-
-      if (res.ok) {
-        toast('ตอบกลับสำเร็จ ✅', 'ok');
-        loadInbox();
-      } else {
-        toast(data.message, 'err');
-      }
+      if (res.ok) { toast('ตอบกลับสำเร็จ ✅', 'ok'); loadInbox(); }
+      else toast(data.message, 'err');
     }
 
-    async function markSold(id) {
-      if (!confirm('ยืนยันว่าขายสินค้านี้แล้ว?')) return;
-      const res = await fetch(`${API}/listings/${id}/sold`, { method: 'PATCH' });
-      if (res.ok) { toast('ขายแล้ว! 🎉', 'ok'); loadMyListings(); }
-      else toast('เกิดข้อผิดพลาด', 'err');
+    function markSold(id) {
+      confirmDialog('ยืนยันว่าขายสินค้านี้แล้ว?', async () => {
+        const res = await fetch(`${API}/listings/${id}/sold`, { method: 'PATCH' });
+        if (res.ok) { toast('ขายแล้ว! 🎉', 'ok'); loadMyListings(); }
+        else toast('เกิดข้อผิดพลาด', 'err');
+      });
     }
 
-    async function closeListing(id) {
-      if (!confirm('ต้องการปิดประกาศนี้?')) return;
-      const res = await fetch(`${API}/listings/${id}`, { method: 'DELETE' });
-      if (res.ok) { toast('ปิดประกาศแล้ว', 'info'); loadMyListings(); }
-      else toast('เกิดข้อผิดพลาด', 'err');
+    function closeListing(id) {
+      confirmDialog('ต้องการปิดประกาศนี้?', async () => {
+        const res = await fetch(`${API}/listings/${id}`, { method: 'DELETE' });
+        if (res.ok) { toast('ปิดประกาศแล้ว', 'info'); loadMyListings(); }
+        else toast('เกิดข้อผิดพลาด', 'err');
+      });
     }
 
     loadMyListings();
