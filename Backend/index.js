@@ -9,7 +9,7 @@ const port = 8000;
 
 app.use(cors());
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: true }));//สั่งอ่านข้อมูลHTML
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
