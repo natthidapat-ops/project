@@ -1,8 +1,8 @@
-// SPI 6 — POST /users/login
+//  POST /users/login
 
 module.exports = (app, getConn) => {
 
-    // POST /users — สมัครสมาชิก
+    // 1. POST /users — สมัครสมาชิก
     // body: { name, email, password, description }
     app.post('/users', async (req, res) => {
         try {
@@ -25,7 +25,7 @@ module.exports = (app, getConn) => {
         }
     });
 
-    // POST /users/login — เข้าสู่ระบบ
+    // 2. POST /users/login — เข้าสู่ระบบ
     // body: { email, password }
     app.post('/users/login', async (req, res) => {
         try {
